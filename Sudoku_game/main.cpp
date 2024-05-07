@@ -1,21 +1,30 @@
 #include <iostream>
 #include <string>
 #include "Board.h"
+#include "Solve.h"
 #include <math.h>
 
 using namespace std;
 
 
-void printPuzzle(int** board, bool** immutable, int N)
-{
-	
 
-}
 
 int main() {
-	Board board(9);
-	board.printPuzzle();
+	int size = 9;
+	Board* board = new Board(size);
+	board = generateBoard(size);
+	board->printPuzzle();
 
+	cout << "\n\nAfter solve:" << endl;
+	if (solve(board, 0,0))
+	{
+		cout << "Puzzle was solved" << endl;
+		board->printPuzzle();
+	}
+	else
+	{
+		cout << "Couldn't solve this problem" << endl;
+	}
 
 
 	return 0;

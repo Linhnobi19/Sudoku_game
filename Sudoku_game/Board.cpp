@@ -3,7 +3,8 @@
 #include <cassert>
 #include <cstdlib>
 #include <math.h>
-
+#include <iomanip>
+#include "Solve.h"
 using namespace std;
 
 
@@ -29,7 +30,7 @@ Board::Board(int s)
 
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < N; j++)
-			immutable[i][j] = true;
+			immutable[i][j] = false;
 
 	// matrix to track which values are causing infeasibilitsy
 	// these are problem cells that will be
@@ -113,6 +114,14 @@ void Board::printPuzzle()
 			// if the number is immutable --> print yellow
 			else
 			{
+				if (extraSpace)
+				{
+					cout << setw(2);
+				}
+				else
+				{
+					cout << setw(1);
+				}
 				if (immutable[row][col] == true) {
 					cout << "\033[33m" << board[row][col] << "\033[39m" << ' ';
 				}
@@ -134,26 +143,59 @@ void Board::printPuzzle()
 	}
 }
 
-void Board::checkPuzzle()
+bool Board::checkPuzzle()
 {
+	// check every position
+	for (size_t row = 0; row < N; row++)
+	{
+		for (size_t col = 0; col < N; col++) {
+			int val = (*this)(row, col);
+
+
+			// set to 0 because possible function loop through all possible position that inlcude this position
+			(*this)(row, col) = 0;
+			if (!possible(*this, row, col, val))
+			{
+				(*this)(row, col) = val;	// return value
+				return false;
+			}
+			(*this)(row, col) = val;
+		}
+	}
+
+	bool check = true;
 }
 
-void Board::possibleUser(int, int, int)
+bool Board::possibleUser(int, int, int)
 {
+	return false;
 }
 
 void Board::clearPuzzle()
 {
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < 0; j++) {
+			if (checkImmutable(i, j) == false)
+			{
+				(*this)(i, j) = 0;
+			}
+		}
+	}
 }
 
-bool Board::inBounds(int, int)
+bool Board::inBounds(int r, int c)
 {
-	return false;
+	if ((r < 0) || r >= N || c < 0 || c >= N)
+	{
+		return false;
+	}
+	return true;
 }
 
-bool Board::isProblem(int, int)
+bool Board::isProblem(int r, int c)
 {
-	return false;
+	return possiblities[r][c];
 }
 
 int& Board::operator()(int x, int y)
@@ -163,20 +205,22 @@ int& Board::operator()(int x, int y)
 	return board[x][y];
 }
 
-void Board::assignValue(int, int, int)
+void Board::assignValue(int r, int c, int val)
 {
+	(*this)(r, c) = val;
 }
 
-void Board::assignImmutable(int, int)
+void Board::assignImmutable(int r, int c, bool val)
 {
+	immutable[r][c] = val;
 }
 
-bool Board::checkImmutable(int, int)
+bool Board::checkImmutable(int r, int c)
 {
-	return false;
+	return immutable[r][c];
 }
 
 int Board::getSize() const
 {
-	return 0;
+	return N;
 }
