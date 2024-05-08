@@ -5,6 +5,8 @@
 #include <vector>
 #include <cassert>
 #include <cstdlib>
+#include <ctime>
+
 
 using namespace std;
 
@@ -64,19 +66,12 @@ bool solve(Board* board, int row, int col)
     if ((*board)(row, col) != 0)
     {
         // try the next col if the col still not reach the bound
-        /*if (col < size - 1)
+        if (col < size - 1)
         {
             if (solve(board, row, col + 1)) return true;
         }
         else {
             if (solve(board, row + 1, 0)) return true;
-        }*/
-        if (col < size - 1)
-        {
-            return (solve(board, row, col + 1));
-        }
-        else {
-            return (solve(board, row + 1, 0));
         }
 
         return false;
@@ -97,13 +92,6 @@ bool solve(Board* board, int row, int col)
             else {
                 if (solve(board, row, col + 1)) return true;
             }
-            /*if (col < size - 1)
-            {
-                return (solve(board, row, col + 1));
-            }
-            else {
-                return (solve(board, row + 1, 0));
-            }*/
         }
     }
 
@@ -117,22 +105,12 @@ Board* generateBoard(int size)
 {
     Board* board = new Board(size);
 
-    //// Tạo một engine ngẫu nhiên
-    //std::random_device rd;
-    //std::mt19937 gen(rd()); // Sử dụng mersenne_twister_engine
+    fillDiagonal(board);
 
-    //// Xác định phạm vi của số ngẫu nhiên
-    //std::uniform_int_distribution<> distrib(0, size);
+    solve(board, 0, 0);
+    removeRandom(board);
 
-
-    //for (size_t i = 0; i < size; i++)
-    //{
-    //    for (size_t j = 0; j < size; j++) {
-    //        board(i, j) = distrib(gen);
-    //    }
-    //}
-
-    vector<vector<int>> arr = {
+    /*vector<vector<int>> arr = {
         {0,6,0,  0,0,7,   0,0,1},
         {0,0,1,  0,8,0,   7,6,2},
         {2,0,0,  0,1,0,   4,0,0},
@@ -144,18 +122,104 @@ Board* generateBoard(int size)
         {9,0,0,  8,0,0,   5,0,0},
         {0,0,8,  7,4,0,   0,0,0},
         {0,7,0,  0,9,0,   8,0,0}
-    };
+    };*/
 
-    for (size_t i = 0; i < 9; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (size_t j = 0; j < 9; j++) {
-            (*board)(i, j) = arr[i][j];
-            if (arr[i][j] != 0)
+        for (size_t j = 0; j < size; j++) {
+            if ((*board)(i, j) != 0)
             {
                 board->assignImmutable(i, j, true);
             }
         }
     }
 
+
+
     return board;
 }
+
+void fillDiagonal(Board* board)
+{
+    int gap = sqrt(board->getSize());
+
+    // loop through each box in diagoonal
+    for (size_t i = 0; i < board->getSize(); i = i + gap)
+    {
+        // fill the box
+        for (size_t row = 0; row < gap; row++)
+        {
+            for (size_t col = 0; col < gap; col++) {
+                int randNum = 0;
+                if ((*board)(i + row, i + col) != 0)
+                {
+                    continue;
+                }
+                do
+                {
+                    randNum = randomNum(board->getSize()) ;
+                } while (!possibleInBox(board, i, i, randNum));
+                (*board)(i + row, i + col) = randNum;
+                cout << (*board)(i + row, i + col) << endl;
+            }
+        }
+    }
+    //board->printPuzzle();
+}
+
+void removeRandom(Board* board)
+{
+    int size = board->getSize();
+    // define the number want to remove around 2 / 3
+    int removeMax = size * size * 3 / 4;
+    int removeMin = size * size * 2 / 3;
+    int removeNum = 0;
+    do
+    {
+        removeNum = randomNum(size * size);
+    } while (removeNum > removeMax || removeNum < removeMin);
+
+    // try to delete
+    while (removeNum > 0)
+    {
+        // random row, col
+        // number is sum --> find row, col
+        int sum = randomNum(size * size) - 1;
+        int r = sum / size;
+        int c = sum % size;
+
+        if ((*board)(r, c) != 0)
+        {
+            (*board)(r, c) = 0;
+            removeNum--;
+        }
+    }
+}
+
+int randomNum(int N)
+{
+    return (int)floor((float)(rand() / (double)RAND_MAX * N + 1));
+
+}
+
+bool possibleInBox(Board* board, int rowStart, int colStart, int val)
+{
+    int numLoop = sqrt(board->getSize());
+
+
+    for (size_t i = rowStart; i < rowStart + numLoop; i++)
+    {
+        for (size_t j = colStart; j < colStart + numLoop; j++)
+        {
+            //if (row == i && col == j) continue;
+            int compare = (*board)(i, j);
+            if (compare == val)
+            {
+                return false;
+            }
+
+        }
+    }
+    return true;
+}
+
