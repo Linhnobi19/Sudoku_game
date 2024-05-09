@@ -108,6 +108,7 @@ Board* generateBoard(int size)
     fillDiagonal(board);
 
     solve(board, 0, 0);
+
     removeRandom(board);
 
     /*vector<vector<int>> arr = {
@@ -160,7 +161,7 @@ void fillDiagonal(Board* board)
                     randNum = randomNum(board->getSize()) ;
                 } while (!possibleInBox(board, i, i, randNum));
                 (*board)(i + row, i + col) = randNum;
-                cout << (*board)(i + row, i + col) << endl;
+                //cout << (*board)(i + row, i + col) << endl;
             }
         }
     }
@@ -179,6 +180,7 @@ void removeRandom(Board* board)
         removeNum = randomNum(size * size);
     } while (removeNum > removeMax || removeNum < removeMin);
 
+    //cout << "Clear " << removeNum << endl;
     // try to delete
     while (removeNum > 0)
     {
@@ -198,7 +200,17 @@ void removeRandom(Board* board)
 
 int randomNum(int N)
 {
-    return (int)floor((float)(rand() / (double)RAND_MAX * N + 1));
+    /*srand(time(0));
+    return (int)floor((float)(rand() / (double)RAND_MAX * N + 1));*/
+
+    // Tạo một engine ngẫu nhiên
+    std::random_device rd;
+    std::mt19937 gen(rd()); // Sử dụng mersenne_twister_engine
+
+    // Xác định phạm vi của số ngẫu nhiên
+    std::uniform_int_distribution<> distrib(1, N);
+
+    return distrib(gen);
 
 }
 

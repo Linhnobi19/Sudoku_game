@@ -14,7 +14,7 @@ public:
 	bool checkPuzzle();		// check if the puzzle is approriate
 	bool possibleUser(int, int, int);	// use to track number that user typed and change possiblitites
 	void clearPuzzle();				// clear puzzle if the user get stuck 
-	bool inBounds(int, int);		// chekc if the position is in board
+	bool inBounds(int);		// chekc if the position is in board
 	bool isProblem(int, int);		// check if the current position is valid or not
 
 	// some function for easier acccess and assignValue

@@ -5,6 +5,7 @@
 #include <math.h>
 #include <iomanip>
 #include "Solve.h"
+
 using namespace std;
 
 
@@ -42,7 +43,7 @@ Board::Board(int s)
 
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < N; j++)
-			possiblities[i][j] = false;
+			possiblities[i][j] = true;
 
 
 
@@ -74,6 +75,7 @@ void Board::printPuzzle()
 	int squareBox = sqrt(N);
 
 	// print the upper bound 
+	cout << "\t\t\t\t";
 	for (size_t i = 0; i < N; i++)
 	{
 		cout << "+---";
@@ -88,8 +90,10 @@ void Board::printPuzzle()
 	cout << "+" << endl;	// end corner
 
 	// print number
+	
 	for (size_t row = 0; row < N; row++)
 	{
+		cout << "\t\t\t\t";
 		for (size_t col = 0; col < N; col++) {
 
 			if ((col) % squareBox == 0)
@@ -114,16 +118,14 @@ void Board::printPuzzle()
 			// if the number is immutable --> print yellow
 			else
 			{
-				if (extraSpace)
-				{
-					cout << setw(2);
-				}
-				else
-				{
-					cout << setw(1);
-				}
+				if (extraSpace) cout << setw(2);
+				else cout << setw(1);
 				if (immutable[row][col] == true) {
 					cout << "\033[33m" << board[row][col] << "\033[39m" << ' ';
+				}
+				else if (possiblities[row][col] == false)
+				{
+					cout << "\033[31m" << board[row][col] << "\033[39m" << ' ';
 				}
 				else cout << board[row][col] << ' ';
 			}
@@ -131,6 +133,7 @@ void Board::printPuzzle()
 		cout << "|" << endl;
 		if ((row + 1) % squareBox == 0)
 		{
+			cout << "\t\t\t\t";
 			for (size_t i = 0; i < N; i++) {
 				cout << "+---";
 				if (extraSpace)
@@ -166,9 +169,89 @@ bool Board::checkPuzzle()
 	bool check = true;
 }
 
-bool Board::possibleUser(int, int, int)
+// function is simmilar to function possible in solve header file
+// But it change the possible square to help change the color
+// use to warn user that enter wrong number
+bool Board::possibleUser(int row, int col, int val)
 {
-	return false;
+	int boxSize = sqrt(N);
+
+	if (row > N || row < 0)
+	{
+		cout << "\n\t\t\t--> You can't play off the game board";
+		return false;
+	}
+	if (col > N || col < 0)
+	{
+		cout << "\n\t\t\t--> You can't play off the game board";
+		return false;
+	}
+
+	bool isPossible = true;
+	// check every ele in row
+	for (size_t i = 0; i < N; i++)
+	{
+		/*if (i == col)
+		{
+			continue;
+		}*/
+		if ((*this)(row, i) == val) {
+			possiblities[row][i] = false;
+			cout << "duplicate in row with (" << row + 1 << ", " << i + 1 << ")" << " value is " << (*this)(row, i) << endl;
+			isPossible = false;
+		}
+		else
+		{
+			possiblities[row][i] = true;
+		}
+	}
+
+	// check every ele in col
+	for (size_t i = 0; i < N; i++)
+	{
+		/*if (i == row)
+		{
+			continue;
+		}*/
+		if ((*this)(i, col) == val) {
+			possiblities[i][col] = false;
+			cout << "duplicate in col with (" << i + 1 << ", " << col + 1 << ")" << (*this)(i, col) << endl;
+			isPossible = false;
+		}
+		else
+		{
+			possiblities[row][i] = true;
+		}
+	}
+
+	// check every ele in box
+	int boxRow = row - (row % boxSize);
+	int boxCol = col - (col % boxSize);
+
+	for (size_t i = boxRow; i < boxSize + boxRow; i++)
+	{
+		for (size_t j = boxCol; j < boxCol + boxSize; j++) {
+			/*cout << board(i, j) << ' ';*/
+			if ((*this)(i, j) == val)
+			{
+				/*if (i == row && j == col)
+				{
+					continue;
+				}*/
+				possiblities[i][j] = false;
+				cout << "duplicate in box with (" << i + 1 << ", " << j + 1 << ")" << " value is " << (*this)(i, j) << endl;
+				isPossible = false;
+			}
+			else
+			{
+				possiblities[i][j] = true;
+			}
+		}
+		//cout << endl;
+	}
+
+
+	return isPossible;
 }
 
 void Board::clearPuzzle()
@@ -184,9 +267,9 @@ void Board::clearPuzzle()
 	}
 }
 
-bool Board::inBounds(int r, int c)
+bool Board::inBounds(int val)
 {
-	if ((r < 0) || r >= N || c < 0 || c >= N)
+	if ((val < 0) || val >= N)
 	{
 		return false;
 	}
